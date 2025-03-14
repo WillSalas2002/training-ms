@@ -5,7 +5,9 @@ import com.epam.training.model.Trainer;
 import com.epam.training.model.TrainingSession;
 import com.epam.training.repository.TrainerRepository;
 import com.epam.training.repository.TrainingSessionRepository;
+import com.epam.training.util.TransactionContext;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.Month;
@@ -17,6 +19,7 @@ import java.util.NoSuchElementException;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.summingInt;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TrainerMonthlyReportService {
@@ -27,6 +30,8 @@ public class TrainerMonthlyReportService {
     public TrainerMonthlySummary generateMonthlyReport(String trainerUsername) {
         Trainer trainer = trainerRepository.findByTrainerUsername(trainerUsername)
                 .orElseThrow(NoSuchElementException::new);
+        // TODO: do something when no records found for a trainer.
+        log.info("Transaction ID: {}. Starting to get a summary for trainer: {}", TransactionContext.getTransactionId(), trainer);
         List<TrainingSession> trainingSessions = trainingSessionRepository.findByTrainerUsername(trainerUsername);
         Map<Integer, List<TrainingSession>> yearlySummary = trainingSessions.stream()
                 .filter(ts -> ts.getTrainerUsername().equals(trainerUsername))

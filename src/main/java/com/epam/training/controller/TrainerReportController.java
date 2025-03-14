@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/trainer/{username}/summaries")
+@RequestMapping("/api/v1/trainers/{username}/summary")
 public class TrainerReportController {
 
     private final TrainerMonthlyReportService service;
