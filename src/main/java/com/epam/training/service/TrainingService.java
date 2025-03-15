@@ -38,7 +38,6 @@ public class TrainingService {
 
     public void delete(TrainingRequest request) {
         log.info("Transaction ID: {}. Starting to delete trainer with data: {}", TransactionContext.getTransactionId(), request);
-        trainerRepository.remove(request.getUsername());
         trainingSessionRepository.remove(request.getUsername());
     }
 }

@@ -3,6 +3,7 @@ package com.epam.training.repository;
 import com.epam.training.model.TrainingSession;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,6 +30,7 @@ public class TrainingSessionRepository {
     }
 
     public void remove(String trainerUsername) {
-        trainingSessionStorage.remove(trainerUsername);
+        List<TrainingSession> trainingSessions = trainingSessionStorage.get(trainerUsername);
+        trainingSessions.removeIf(ts -> ts.getDate().isAfter(LocalDateTime.now()));
     }
 }
