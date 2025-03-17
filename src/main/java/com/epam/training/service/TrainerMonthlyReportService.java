@@ -30,7 +30,6 @@ public class TrainerMonthlyReportService {
     public TrainerMonthlySummary generateMonthlyReport(String trainerUsername) {
         Trainer trainer = trainerRepository.findByTrainerUsername(trainerUsername)
                 .orElseThrow(NoSuchElementException::new);
-        // TODO: do something when no records found for a trainer.
         log.info("Transaction ID: {}. Starting to get a summary for trainer: {}", TransactionContext.getTransactionId(), trainer);
         List<TrainingSession> trainingSessions = trainingSessionRepository.findByTrainerUsername(trainerUsername);
         Map<Integer, List<TrainingSession>> yearlySummary = trainingSessions.stream()
