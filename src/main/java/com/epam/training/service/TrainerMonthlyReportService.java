@@ -14,7 +14,7 @@ import java.time.Month;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.summingInt;
@@ -28,8 +28,13 @@ public class TrainerMonthlyReportService {
     private final TrainingSessionRepository trainingSessionRepository;
 
     public TrainerMonthlySummary generateMonthlyReport(String trainerUsername) {
-        Trainer trainer = trainerRepository.findByTrainerUsername(trainerUsername)
-                .orElseThrow(NoSuchElementException::new);
+        Optional<Trainer> trainerOptional = trainerRepository.findByTrainerUsername(trainerUsername);
+        if (trainerOptional.isEmpty()) {
+            return TrainerMonthlySummary.builder()
+                    .username(trainerUsername)
+                    .build();
+        }
+        Trainer trainer = trainerOptional.get();
         log.info("Transaction ID: {}. Starting to get a summary for trainer: {}", TransactionContext.getTransactionId(), trainer);
         List<TrainingSession> trainingSessions = trainingSessionRepository.findByTrainerUsername(trainerUsername);
         Map<Integer, List<TrainingSession>> yearlySummary = trainingSessions.stream()
