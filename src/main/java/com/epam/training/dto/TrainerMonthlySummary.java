@@ -1,5 +1,6 @@
 package com.epam.training.dto;
 
+import com.epam.training.model.Trainer;
 import lombok.Builder;
 import lombok.Data;
 
@@ -11,9 +12,6 @@ import java.util.Map;
 @Data
 public class TrainerMonthlySummary {
 
-    private String username;
-    private String firstName;
-    private String lastName;
-    private boolean status;
-    private Map<Integer, Map<Month, Integer>> summary;
+    private Trainer trainer;
+    private Map<Integer, Map<Month, Double>> summary;
 }

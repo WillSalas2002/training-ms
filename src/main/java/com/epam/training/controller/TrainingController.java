@@ -2,7 +2,7 @@ package com.epam.training.controller;
 
 import com.epam.training.dto.TrainingRequest;
 import com.epam.training.enums.ActionType;
-import com.epam.training.service.TrainingService;
+import com.epam.training.service.ScheduledTrainingServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,14 +14,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class TrainingController {
 
-    private final TrainingService trainingService;
+    private final ScheduledTrainingServiceImpl scheduledTrainingServiceImpl;
 
     @PostMapping
     public void saveOrDelete(@RequestBody TrainingRequest request) {
         if (request.getActionType().equals(ActionType.DELETE)) {
-            trainingService.delete(request);
+            scheduledTrainingServiceImpl.delete(request);
             return;
         }
-        trainingService.save(request);
+        scheduledTrainingServiceImpl.save(request);
     }
 }

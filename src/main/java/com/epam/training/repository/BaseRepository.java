@@ -1,9 +1,12 @@
 package com.epam.training.repository;
 
-import java.util.Optional;
+import com.epam.training.model.ScheduledTraining;
+
+import java.util.List;
 
 public interface BaseRepository<ENTITY_TYPE> {
 
     void save(ENTITY_TYPE entityType);
-    Optional<ENTITY_TYPE> findByTrainerUsername(String trainerUsername);
+    List<ScheduledTraining> findByTrainerUsername(String trainerUsername);
+    void deleteByUsername(String trainerUsername);
 }

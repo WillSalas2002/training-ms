@@ -7,9 +7,9 @@ import java.time.LocalDateTime;
 
 @Builder
 @Data
-public class TrainingSession {
+public class ScheduledTraining {
 
-    private String trainerUsername;
+    private Trainer trainer;
     private Integer duration;
     private LocalDateTime date;
 }
