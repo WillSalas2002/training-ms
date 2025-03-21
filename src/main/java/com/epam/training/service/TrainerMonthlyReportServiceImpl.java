@@ -32,7 +32,7 @@ public class TrainerMonthlyReportServiceImpl implements TrainerMonthlyReportServ
         List<ScheduledTraining> scheduledTrainings = scheduledTrainingRepository.findByTrainerUsername(trainerUsername);
         if (scheduledTrainings.isEmpty()) {
             log.warn("No scheduled trainings found for trainer: {}", trainerUsername);
-            throw new NoSuchElementException("Trainer has no scheduled trainings.");
+            throw new NoSuchElementException(trainerUsername);
         }
 
         Map<Integer, Map<Month, Double>> monthlySummary = generateMonthlySummary(scheduledTrainings);
