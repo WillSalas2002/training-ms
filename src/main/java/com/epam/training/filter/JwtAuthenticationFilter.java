@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 @Component
 @RequiredArgsConstructor
@@ -24,6 +25,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     public static final String MESSAGE_INVALID_TOKEN = "Invalid JWT token";
     public static final String MESSAGE_TOKEN_NOT_PROVIDED = "JWT token not provided";
     public static final String EMPTY_STRING = "";
+    private final static String[] ALLOWED_ENDPOINTS = {"/api/v1/tokens"};
 
     private final JwtService jwtService;
     private final ObjectMapper objectMapper;
@@ -33,6 +35,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain chain
     ) throws ServletException, IOException {
+
+        if (Arrays.asList(ALLOWED_ENDPOINTS).contains(request.getRequestURI())) {
+            chain.doFilter(request, response);
+            return;
+        }
 
         try {
             String authHeader = request.getHeader(AUTH_HEADER_NAME);

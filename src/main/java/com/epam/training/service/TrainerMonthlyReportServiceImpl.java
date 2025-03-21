@@ -30,7 +30,7 @@ public class TrainerMonthlyReportServiceImpl implements TrainerMonthlyReportServ
                 TransactionContext.getTransactionId(), trainerUsername);
 
         List<ScheduledTraining> scheduledTrainings = scheduledTrainingRepository.findByTrainerUsername(trainerUsername);
-        if (scheduledTrainings.isEmpty()) {
+        if (scheduledTrainings == null || scheduledTrainings.isEmpty()) {
             log.warn("No scheduled trainings found for trainer: {}", trainerUsername);
             throw new NoSuchElementException(trainerUsername);
         }
@@ -56,47 +56,4 @@ public class TrainerMonthlyReportServiceImpl implements TrainerMonthlyReportServ
                         )
                 ));
     }
-
-    /*
-    @Override
-    public TrainerMonthlySummary generateMonthlyReport(String trainerUsername) {
-        List<ScheduledTraining> scheduledTrainings = scheduledTrainingRepository.findByTrainerUsername(trainerUsername);
-        if (scheduledTrainings.isEmpty()) {
-            throw new NoSuchElementException();
-        }
-        log.info("Transaction ID: {}. Starting to get a summary for trainer: {}", TransactionContext.getTransactionId(), trainerUsername);
-
-        Map<Integer, List<ScheduledTraining>> yearlySummary = groupSummaryByYear(scheduledTrainings);
-        Map<Integer, Map<Month, Integer>> monthlySummary = groupSummaryByMonth(yearlySummary);
-
-        Trainer trainer = scheduledTrainings.get(0).getTrainer();
-        return TrainerMonthlySummary.builder()
-                .trainer(trainer)
-                .summary(monthlySummary)
-                .build();
-    }
-
-    private static Map<Integer, List<ScheduledTraining>> groupSummaryByYear(List<ScheduledTraining> scheduledTrainings) {
-        return scheduledTrainings.stream()
-                .collect(groupingBy(ts -> ts.getDate().getYear()));
-    }
-
-    private static Map<Integer, Map<Month, Integer>> groupSummaryByMonth(Map<Integer, List<ScheduledTraining>> yearlySummary) {
-        Map<Integer, Map<Month, Integer>> summary = new HashMap<>();
-
-        for (Map.Entry<Integer, List<ScheduledTraining>> entry : yearlySummary.entrySet()) {
-            Integer year = entry.getKey();
-            List<ScheduledTraining> scheduledTrainingSessionsOfYear = entry.getValue();
-
-            Map<Month, Integer> summaryByMonth = scheduledTrainingSessionsOfYear
-                    .stream()
-                    .collect(groupingBy(ts -> ts.getDate().getMonth(),
-                            summingInt(ScheduledTraining::getDuration)));
-
-            summary.put(year, summaryByMonth);
-        }
-        return summary;
-    }
-
-     */
 }
