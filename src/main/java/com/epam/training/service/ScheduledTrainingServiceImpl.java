@@ -20,7 +20,18 @@ public class ScheduledTrainingServiceImpl implements ScheduledTrainingService {
     public void save(TrainingRequest request) {
         log.info("Transaction ID: {}. Starting to save trainer data: {}", TransactionContext.getTransactionId(), request);
 
-        ScheduledTraining scheduledTraining = ScheduledTraining.builder()
+        ScheduledTraining scheduledTraining = buildTraining(request);
+        scheduledTrainingRepository.save(scheduledTraining);
+    }
+
+    @Override
+    public void delete(TrainingRequest request) {
+        log.info("Transaction ID: {}. Starting to delete trainer with data: {}", TransactionContext.getTransactionId(), request);
+        scheduledTrainingRepository.deleteByUsername(request.getUsername());
+    }
+
+    private static ScheduledTraining buildTraining(TrainingRequest request) {
+        return ScheduledTraining.builder()
                 .trainer(Trainer.builder()
                         .username(request.getUsername())
                         .firstName(request.getFirstName())
@@ -31,12 +42,5 @@ public class ScheduledTrainingServiceImpl implements ScheduledTrainingService {
                 .duration(request.getDuration())
                 .date(request.getDate())
                 .build();
-        scheduledTrainingRepository.save(scheduledTraining);
-    }
-
-    @Override
-    public void delete(TrainingRequest request) {
-        log.info("Transaction ID: {}. Starting to delete trainer with data: {}", TransactionContext.getTransactionId(), request);
-        scheduledTrainingRepository.deleteByUsername(request.getUsername());
     }
 }

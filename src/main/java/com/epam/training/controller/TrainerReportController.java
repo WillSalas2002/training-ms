@@ -1,7 +1,7 @@
 package com.epam.training.controller;
 
 import com.epam.training.dto.TrainerMonthlySummary;
-import com.epam.training.service.TrainerMonthlyReportServiceImpl;
+import com.epam.training.service.TrainerMonthlyReportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/trainers")
 public class TrainerReportController {
 
-    private final TrainerMonthlyReportServiceImpl service;
+    private final TrainerMonthlyReportService service;
 
     @GetMapping("{username}/summary")
     public TrainerMonthlySummary summarize(@PathVariable("username") String username) {
