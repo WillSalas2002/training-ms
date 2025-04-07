@@ -18,10 +18,10 @@ public class TrainingController {
 
     @PostMapping
     public void saveOrDelete(@RequestBody TrainingRequest request) {
-        if (request.getActionType().equals(ActionType.DELETE)) {
+        if (ActionType.DELETE.equals(request.getActionType())) {
             scheduledTrainingServiceImpl.delete(request);
-            return;
+        } else {
+            scheduledTrainingServiceImpl.save(request);
         }
-        scheduledTrainingServiceImpl.save(request);
     }
 }

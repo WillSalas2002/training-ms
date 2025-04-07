@@ -3,11 +3,6 @@ package com.epam.training.listener;
 import com.epam.training.dto.TrainingRequest;
 import com.epam.training.enums.ActionType;
 import com.epam.training.service.ScheduledTrainingServiceImpl;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.jms.JMSException;
-import jakarta.jms.Message;
-import jakarta.jms.TextMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jms.annotation.JmsListener;
@@ -18,29 +13,19 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class TrainingMessageListener {
 
-    private final ObjectMapper objectMapper;
+    public static final String MESSAGE_INVALID_ACTION_TYPE = "Action type cannot be null";
     private final ScheduledTrainingServiceImpl scheduledTrainingServiceImpl;
 
     @JmsListener(destination = "training-ms.queue", containerFactory = "jmsListenerContainerFactory")
-    public void receiveMessage(Message message) throws JMSException, JsonProcessingException {
-        try {
-            if (message instanceof TextMessage textMessage) {
-                String json = textMessage.getText();
-                TrainingRequest request = objectMapper.readValue(json, TrainingRequest.class);
-                if ("error".equals(request.getUsername())) {
-                    throw new RuntimeException("Simulated error");
-                }
-                log.info("Received message: {}", request);
-
-                if (request.getActionType().equals(ActionType.DELETE)) {
-                    scheduledTrainingServiceImpl.delete(request);
-                } else {
-                    scheduledTrainingServiceImpl.save(request);
-                }
-            }
-        } catch (Exception e) {
-            log.error("Error processing message, triggering rollback: {}", e.getMessage());
-            throw e;
+    public void receiveMessage(TrainingRequest request) {
+        log.info("Received message: {}", request);
+        if (request.getActionType() == null) {
+            throw new RuntimeException(MESSAGE_INVALID_ACTION_TYPE);
+        }
+        if (ActionType.DELETE.equals(request.getActionType())) {
+            scheduledTrainingServiceImpl.delete(request);
+        } else {
+            scheduledTrainingServiceImpl.save(request);
         }
     }
 }
