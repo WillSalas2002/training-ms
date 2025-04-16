@@ -5,7 +5,7 @@ import com.epam.training.dto.TrainingRequest;
 import com.epam.training.enums.ActionType;
 import com.epam.training.filter.JwtAuthenticationFilter;
 import com.epam.training.service.JwtService;
-import com.epam.training.service.ScheduledTrainingServiceImpl;
+import com.epam.training.service.MongoScheduledTrainingService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,7 +46,7 @@ class TrainingControllerTest {
     private ObjectMapper objectMapper;
 
     @MockitoBean
-    private ScheduledTrainingServiceImpl scheduledTrainingServiceImpl;
+    private MongoScheduledTrainingService mongoScheduledTrainingService;
 
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -75,8 +75,8 @@ class TrainingControllerTest {
                         .content(objectMapper.writeValueAsString(request)))  // Simulating JSON body
                 .andExpect(status().isOk());
 
-        verify(scheduledTrainingServiceImpl, times(1)).save(request);
-        verify(scheduledTrainingServiceImpl, never()).delete(any());
+        verify(mongoScheduledTrainingService, times(1)).save(request);
+        verify(mongoScheduledTrainingService, never()).delete(any());
     }
 
     @Test
@@ -91,8 +91,8 @@ class TrainingControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
 
-        verify(scheduledTrainingServiceImpl, times(1)).delete(request);
-        verify(scheduledTrainingServiceImpl, never()).save(any());
+        verify(mongoScheduledTrainingService, times(1)).delete(request);
+        verify(mongoScheduledTrainingService, never()).save(any());
     }
 
     @Test
@@ -111,8 +111,8 @@ class TrainingControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized());
 
-        verify(scheduledTrainingServiceImpl, never()).save(any());
-        verify(scheduledTrainingServiceImpl, never()).delete(any());
+        verify(mongoScheduledTrainingService, never()).save(any());
+        verify(mongoScheduledTrainingService, never()).delete(any());
     }
 
     private String generateToken() {

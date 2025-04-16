@@ -1,5 +1,6 @@
 package com.epam.training.model;
 
+import com.epam.training.dto.Trainer;
 import lombok.Builder;
 import lombok.Data;
 

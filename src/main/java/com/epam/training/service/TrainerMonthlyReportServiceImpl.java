@@ -1,8 +1,9 @@
 package com.epam.training.service;
 
+import com.epam.training.dto.Trainer;
 import com.epam.training.dto.TrainerMonthlySummary;
-import com.epam.training.model.ScheduledTraining;
-import com.epam.training.repository.ScheduledTrainingRepository;
+import com.epam.training.model.TrainingSummary;
+import com.epam.training.repository.TrainerTrainingSummaryRepository;
 import com.epam.training.util.TransactionContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,13 +24,13 @@ public class TrainerMonthlyReportServiceImpl implements TrainerMonthlyReportServ
 
     public static final double INDEX_FOR_CONVERTING_MINUTES_TO_HOURS = 60.0;
 
-    private final ScheduledTrainingRepository scheduledTrainingRepository;
+    private final TrainerTrainingSummaryRepository scheduledTrainingRepository;
 
     public TrainerMonthlySummary generateMonthlyReport(String trainerUsername) {
         log.info("Transaction ID: {}. Fetching scheduled trainings for trainer: {}",
                 TransactionContext.getTransactionId(), trainerUsername);
 
-        List<ScheduledTraining> scheduledTrainings = scheduledTrainingRepository.findByTrainerUsername(trainerUsername);
+        List<TrainingSummary> scheduledTrainings = scheduledTrainingRepository.findByUsername(trainerUsername);
         if (scheduledTrainings == null || scheduledTrainings.isEmpty()) {
             log.warn("No scheduled trainings found for trainer: {}", trainerUsername);
             throw new NoSuchElementException(trainerUsername);
@@ -40,13 +41,19 @@ public class TrainerMonthlyReportServiceImpl implements TrainerMonthlyReportServ
         log.info("Transaction ID: {}. Successfully generated summary for trainer: {}",
                 TransactionContext.getTransactionId(), trainerUsername);
 
+        TrainingSummary trainingSummary = scheduledTrainings.get(0);
         return TrainerMonthlySummary.builder()
-                .trainer(scheduledTrainings.get(0).getTrainer())
+                .trainer(Trainer.builder()
+                        .firstName(trainingSummary.getFirstName())
+                        .lastName(trainingSummary.getLastName())
+                        .username(trainingSummary.getUsername())
+                        .status(trainingSummary.isStatus())
+                        .build())
                 .summary(monthlySummary)
                 .build();
     }
 
-    private static Map<Integer, Map<Month, Double>> generateMonthlySummary(List<ScheduledTraining> scheduledTrainings) {
+    private static Map<Integer, Map<Month, Double>> generateMonthlySummary(List<TrainingSummary> scheduledTrainings) {
         return scheduledTrainings.stream()
                 .collect(groupingBy(
                         ts -> ts.getDate().getYear(),

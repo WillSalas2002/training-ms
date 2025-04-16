@@ -2,7 +2,7 @@ package com.epam.training.listener;
 
 import com.epam.training.dto.TrainingRequest;
 import com.epam.training.enums.ActionType;
-import com.epam.training.service.ScheduledTrainingServiceImpl;
+import com.epam.training.service.MongoScheduledTrainingService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -14,13 +14,13 @@ import static org.mockito.Mockito.verifyNoInteractions;
 
 class TrainingMessageListenerTest {
 
-    private ScheduledTrainingServiceImpl scheduledTrainingService;
+    private MongoScheduledTrainingService mongoScheduledTrainingService;
     private TrainingMessageListener listener;
 
     @BeforeEach
     void setUp() {
-        scheduledTrainingService = mock(ScheduledTrainingServiceImpl.class);
-        listener = new TrainingMessageListener(scheduledTrainingService);
+        mongoScheduledTrainingService = mock(MongoScheduledTrainingService.class);
+        listener = new TrainingMessageListener(mongoScheduledTrainingService);
     }
 
     @Test
@@ -34,8 +34,8 @@ class TrainingMessageListenerTest {
         listener.receiveMessage(request);
 
         // Then
-        verify(scheduledTrainingService).save(request);
-        verify(scheduledTrainingService, never()).delete(request);
+        verify(mongoScheduledTrainingService).save(request);
+        verify(mongoScheduledTrainingService, never()).delete(request);
     }
 
     @Test
@@ -49,8 +49,8 @@ class TrainingMessageListenerTest {
         listener.receiveMessage(request);
 
         // Then
-        verify(scheduledTrainingService).delete(request);
-        verify(scheduledTrainingService, never()).save(request);
+        verify(mongoScheduledTrainingService).delete(request);
+        verify(mongoScheduledTrainingService, never()).save(request);
     }
 
     @Test
@@ -63,7 +63,7 @@ class TrainingMessageListenerTest {
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage(TrainingMessageListener.MESSAGE_INVALID_ACTION_TYPE);
 
-        verifyNoInteractions(scheduledTrainingService);
+        verifyNoInteractions(mongoScheduledTrainingService);
     }
 
 }

@@ -1,31 +1,29 @@
 package com.epam.training.repository;
 
-import com.epam.training.model.ScheduledTraining;
-import com.epam.training.model.Trainer;
-import org.junit.jupiter.api.BeforeEach;
+import com.epam.training.model.TrainingSummary;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@DataMongoTest
 class ScheduledTrainingRepositoryTest {
 
-    private ScheduledTrainingRepository repository;
-
-    @BeforeEach
-    void setUp() {
-        repository = new ScheduledTrainingRepository();
-    }
+    @Autowired
+    private TrainerTrainingSummaryRepository repository;
 
     @Test
     void testSaveAndFindByTrainerUsername() {
         String username = "John.Doe";
-        ScheduledTraining training = buildTraining(username, LocalDateTime.of(2025, 3, 15, 10, 0));
+        TrainingSummary training = buildTrainingSummary(username, LocalDateTime.of(2025, 3, 15, 10, 0));
 
         repository.save(training);
-        List<ScheduledTraining> retrievedTrainings = repository.findByTrainerUsername(username);
+        List<TrainingSummary> retrievedTrainings = repository.findByUsername(username);
 
         assertNotNull(retrievedTrainings);
         assertEquals(1, retrievedTrainings.size());
@@ -34,41 +32,35 @@ class ScheduledTrainingRepositoryTest {
 
     @Test
     void testFindByTrainerUsername_NoTrainings() {
-        List<ScheduledTraining> retrievedTrainings = repository.findByTrainerUsername("unknownTrainer");
-        assertNull(retrievedTrainings);
+        List<TrainingSummary> retrievedTrainings = repository.findByUsername("unknownTrainer");
+        assertEquals(0, retrievedTrainings.size());
     }
 
     @Test
     void testDeleteByUsername() {
         String username = "John.Doe";
-        ScheduledTraining conductedTraining = buildTraining(username, LocalDateTime.now().minusDays(1));
-        ScheduledTraining futureTraining = buildTraining(username, LocalDateTime.now().plusDays(1));
+        TrainingSummary conductedTraining = buildTrainingSummary(username, LocalDateTime.now().minusDays(1));
+        TrainingSummary futureTraining = buildTrainingSummary(username, LocalDateTime.now().plusDays(1));
 
         repository.save(conductedTraining);
         repository.save(futureTraining);
         repository.deleteByUsername(username);
 
-        List<ScheduledTraining> remainingTrainings = repository.findByTrainerUsername(username);
+        List<TrainingSummary> remainingTrainings = repository.findByUsername(username);
 
         assertNotNull(remainingTrainings);
-        assertEquals(1, remainingTrainings.size());
-        assertEquals(conductedTraining, remainingTrainings.get(0));
+        assertEquals(0, remainingTrainings.size());
     }
 
-    private static ScheduledTraining buildTraining(String username, LocalDateTime date) {
-        return ScheduledTraining.builder()
-                .date(date)
-                .duration(90)
-                .trainer(buildTrainer(username))
-                .build();
-    }
-
-    private static Trainer buildTrainer(String username) {
-        return Trainer.builder()
+    private static TrainingSummary buildTrainingSummary(String username, LocalDateTime date) {
+        String[] split = username.split("\\.");
+        return TrainingSummary.builder()
+                .firstName(split[0])
+                .lastName(split[1])
                 .username(username)
-                .firstName("John")
-                .lastName("Doe")
                 .status(true)
+                .duration(90)
+                .date(date)
                 .build();
     }
 }

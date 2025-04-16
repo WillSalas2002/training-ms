@@ -1,8 +1,8 @@
 package com.epam.training.controller;
 
+import com.epam.training.dto.Trainer;
 import com.epam.training.dto.TrainerMonthlySummary;
 import com.epam.training.filter.JwtAuthenticationFilter;
-import com.epam.training.model.Trainer;
 import com.epam.training.service.JwtService;
 import com.epam.training.service.TrainerMonthlyReportService;
 import org.junit.jupiter.api.BeforeEach;

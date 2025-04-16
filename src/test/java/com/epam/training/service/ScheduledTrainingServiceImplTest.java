@@ -1,8 +1,8 @@
 package com.epam.training.service;
 
 import com.epam.training.dto.TrainingRequest;
-import com.epam.training.model.ScheduledTraining;
-import com.epam.training.repository.ScheduledTrainingRepository;
+import com.epam.training.model.TrainingSummary;
+import com.epam.training.repository.TrainerTrainingSummaryRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,10 +25,10 @@ import static org.mockito.Mockito.verify;
 class ScheduledTrainingServiceImplTest {
 
     @Mock
-    private ScheduledTrainingRepository scheduledTrainingRepository;
+    private TrainerTrainingSummaryRepository repository;
 
     @InjectMocks
-    private ScheduledTrainingServiceImpl scheduledTrainingService;
+    private MongoScheduledTrainingService service;
 
     private TrainingRequest trainingRequest;
 
@@ -46,31 +46,31 @@ class ScheduledTrainingServiceImplTest {
 
     @Test
     void testSave_ShouldCallRepositoryWithCorrectData() {
-        scheduledTrainingService.save(trainingRequest);
+        service.save(trainingRequest);
 
-        ArgumentCaptor<ScheduledTraining> captor = ArgumentCaptor.forClass(ScheduledTraining.class);
-        verify(scheduledTrainingRepository, times(1)).save(captor.capture());
+        ArgumentCaptor<TrainingSummary> captor = ArgumentCaptor.forClass(TrainingSummary.class);
+        verify(repository, times(1)).insert(captor.capture());
 
-        ScheduledTraining capturedTraining = captor.getValue();
+        TrainingSummary capturedTraining = captor.getValue();
         assertNotNull(capturedTraining);
-        assertEquals("John.Doe", capturedTraining.getTrainer().getUsername());
-        assertEquals("John", capturedTraining.getTrainer().getFirstName());
-        assertEquals("Doe", capturedTraining.getTrainer().getLastName());
+        assertEquals("John.Doe", capturedTraining.getUsername());
+        assertEquals("John", capturedTraining.getFirstName());
+        assertEquals("Doe", capturedTraining.getLastName());
         assertEquals(60, capturedTraining.getDuration());
         assertEquals(LocalDateTime.of(2025, 3, 22, 10, 0), capturedTraining.getDate());
     }
 
     @Test
     void testSave_WhenTrainingRequestIsNull_ShouldThrowException() {
-        assertThrows(NullPointerException.class, () -> scheduledTrainingService.save(null));
+        assertThrows(NullPointerException.class, () -> service.save(null));
         
-        verify(scheduledTrainingRepository, never()).save(any(ScheduledTraining.class));
+        verify(repository, never()).save(any(TrainingSummary.class));
     }
 
     @Test
     void testDelete_ShouldCallRepositoryWithCorrectUsername() {
-        scheduledTrainingService.delete(trainingRequest);
+        service.delete(trainingRequest);
 
-        verify(scheduledTrainingRepository, times(1)).deleteByUsername("John.Doe");
+        verify(repository, times(1)).deleteByUsername("John.Doe");
     }
 }

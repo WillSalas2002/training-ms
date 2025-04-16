@@ -1,4 +1,4 @@
-package com.epam.training.model;
+package com.epam.training.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
