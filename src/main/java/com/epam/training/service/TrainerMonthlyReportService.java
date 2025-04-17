@@ -1,8 +1,8 @@
 package com.epam.training.service;
 
-import com.epam.training.dto.TrainerMonthlySummary;
+import com.epam.training.model.TrainingSummary;
 
 public interface TrainerMonthlyReportService {
 
-    TrainerMonthlySummary generateMonthlyReport(String trainerUsername);
+    TrainingSummary generateMonthlyReport(String trainerUsername);
 }

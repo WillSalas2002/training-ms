@@ -1,66 +1,71 @@
 package com.epam.training.repository;
 
+import com.epam.training.model.MonthSummary;
 import com.epam.training.model.TrainingSummary;
+import com.epam.training.model.YearSummary;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DataMongoTest
 class ScheduledTrainingRepositoryTest {
 
     @Autowired
-    private TrainerTrainingSummaryRepository repository;
+    private TrainingRepository repository;
 
     @Test
     void testSaveAndFindByTrainerUsername() {
         String username = "John.Doe";
-        TrainingSummary training = buildTrainingSummary(username, LocalDateTime.of(2025, 3, 15, 10, 0));
+        TrainingSummary training = buildTrainingReport(username, LocalDateTime.of(2025, 3, 15, 10, 0));
 
         repository.save(training);
-        List<TrainingSummary> retrievedTrainings = repository.findByUsername(username);
+        Optional<TrainingSummary> trainingSummaryOptional = repository.findByUsername(username);
 
-        assertNotNull(retrievedTrainings);
-        assertEquals(1, retrievedTrainings.size());
-        assertEquals(training, retrievedTrainings.get(0));
+        assertTrue(trainingSummaryOptional.isPresent());
+        assertEquals(username, trainingSummaryOptional.get().getUsername());
     }
 
     @Test
     void testFindByTrainerUsername_NoTrainings() {
-        List<TrainingSummary> retrievedTrainings = repository.findByUsername("unknownTrainer");
-        assertEquals(0, retrievedTrainings.size());
+        Optional<TrainingSummary> trainingSummaryOptional = repository.findByUsername("unknownTrainer");
+        assertFalse(trainingSummaryOptional.isPresent());
     }
 
     @Test
     void testDeleteByUsername() {
         String username = "John.Doe";
-        TrainingSummary conductedTraining = buildTrainingSummary(username, LocalDateTime.now().minusDays(1));
-        TrainingSummary futureTraining = buildTrainingSummary(username, LocalDateTime.now().plusDays(1));
+        TrainingSummary conductedTraining = buildTrainingReport(username, LocalDateTime.now().minusDays(1));
+        TrainingSummary futureTraining = buildTrainingReport(username, LocalDateTime.now().plusYears(1));
 
         repository.save(conductedTraining);
         repository.save(futureTraining);
         repository.deleteByUsername(username);
 
-        List<TrainingSummary> remainingTrainings = repository.findByUsername(username);
+        Optional<TrainingSummary> trainingSummaryOptional = repository.findByUsername(username);
 
-        assertNotNull(remainingTrainings);
-        assertEquals(0, remainingTrainings.size());
+        assertTrue(trainingSummaryOptional.isEmpty());
     }
 
-    private static TrainingSummary buildTrainingSummary(String username, LocalDateTime date) {
+    private static TrainingSummary buildTrainingReport(String username, LocalDateTime date) {
+        MonthSummary monthSummary = new MonthSummary(date.getMonth(), 120);
+        YearSummary yearSummary = new YearSummary(date.getYear(), List.of(monthSummary));
         String[] split = username.split("\\.");
+
         return TrainingSummary.builder()
+                .username(username)
                 .firstName(split[0])
                 .lastName(split[1])
-                .username(username)
                 .status(true)
-                .duration(90)
-                .date(date)
+                .years(new ArrayList<>(List.of(yearSummary)))
                 .build();
     }
 }

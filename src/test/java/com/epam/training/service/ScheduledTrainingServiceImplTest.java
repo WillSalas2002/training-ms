@@ -2,7 +2,7 @@ package com.epam.training.service;
 
 import com.epam.training.dto.TrainingRequest;
 import com.epam.training.model.TrainingSummary;
-import com.epam.training.repository.TrainerTrainingSummaryRepository;
+import com.epam.training.repository.TrainingRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,10 +25,10 @@ import static org.mockito.Mockito.verify;
 class ScheduledTrainingServiceImplTest {
 
     @Mock
-    private TrainerTrainingSummaryRepository repository;
+    private TrainingRepository repository;
 
     @InjectMocks
-    private MongoScheduledTrainingService service;
+    private TrainingServiceImpl service;
 
     private TrainingRequest trainingRequest;
 
@@ -49,15 +49,13 @@ class ScheduledTrainingServiceImplTest {
         service.save(trainingRequest);
 
         ArgumentCaptor<TrainingSummary> captor = ArgumentCaptor.forClass(TrainingSummary.class);
-        verify(repository, times(1)).insert(captor.capture());
+        verify(repository, times(1)).save(captor.capture());
 
         TrainingSummary capturedTraining = captor.getValue();
         assertNotNull(capturedTraining);
         assertEquals("John.Doe", capturedTraining.getUsername());
         assertEquals("John", capturedTraining.getFirstName());
         assertEquals("Doe", capturedTraining.getLastName());
-        assertEquals(60, capturedTraining.getDuration());
-        assertEquals(LocalDateTime.of(2025, 3, 22, 10, 0), capturedTraining.getDate());
     }
 
     @Test
