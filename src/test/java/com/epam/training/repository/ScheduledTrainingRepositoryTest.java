@@ -1,74 +1,71 @@
 package com.epam.training.repository;
 
-import com.epam.training.model.ScheduledTraining;
-import com.epam.training.model.Trainer;
-import org.junit.jupiter.api.BeforeEach;
+import com.epam.training.model.MonthSummary;
+import com.epam.training.model.TrainingSummary;
+import com.epam.training.model.YearSummary;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@DataMongoTest
 class ScheduledTrainingRepositoryTest {
 
-    private ScheduledTrainingRepository repository;
-
-    @BeforeEach
-    void setUp() {
-        repository = new ScheduledTrainingRepository();
-    }
+    @Autowired
+    private TrainingRepository repository;
 
     @Test
     void testSaveAndFindByTrainerUsername() {
         String username = "John.Doe";
-        ScheduledTraining training = buildTraining(username, LocalDateTime.of(2025, 3, 15, 10, 0));
+        TrainingSummary training = buildTrainingReport(username, LocalDateTime.of(2025, 3, 15, 10, 0));
 
         repository.save(training);
-        List<ScheduledTraining> retrievedTrainings = repository.findByTrainerUsername(username);
+        Optional<TrainingSummary> trainingSummaryOptional = repository.findByUsername(username);
 
-        assertNotNull(retrievedTrainings);
-        assertEquals(1, retrievedTrainings.size());
-        assertEquals(training, retrievedTrainings.get(0));
+        assertTrue(trainingSummaryOptional.isPresent());
+        assertEquals(username, trainingSummaryOptional.get().getUsername());
     }
 
     @Test
     void testFindByTrainerUsername_NoTrainings() {
-        List<ScheduledTraining> retrievedTrainings = repository.findByTrainerUsername("unknownTrainer");
-        assertNull(retrievedTrainings);
+        Optional<TrainingSummary> trainingSummaryOptional = repository.findByUsername("unknownTrainer");
+        assertFalse(trainingSummaryOptional.isPresent());
     }
 
     @Test
     void testDeleteByUsername() {
         String username = "John.Doe";
-        ScheduledTraining conductedTraining = buildTraining(username, LocalDateTime.now().minusDays(1));
-        ScheduledTraining futureTraining = buildTraining(username, LocalDateTime.now().plusDays(1));
+        TrainingSummary conductedTraining = buildTrainingReport(username, LocalDateTime.now().minusDays(1));
+        TrainingSummary futureTraining = buildTrainingReport(username, LocalDateTime.now().plusYears(1));
 
         repository.save(conductedTraining);
         repository.save(futureTraining);
         repository.deleteByUsername(username);
 
-        List<ScheduledTraining> remainingTrainings = repository.findByTrainerUsername(username);
+        Optional<TrainingSummary> trainingSummaryOptional = repository.findByUsername(username);
 
-        assertNotNull(remainingTrainings);
-        assertEquals(1, remainingTrainings.size());
-        assertEquals(conductedTraining, remainingTrainings.get(0));
+        assertTrue(trainingSummaryOptional.isEmpty());
     }
 
-    private static ScheduledTraining buildTraining(String username, LocalDateTime date) {
-        return ScheduledTraining.builder()
-                .date(date)
-                .duration(90)
-                .trainer(buildTrainer(username))
-                .build();
-    }
+    private static TrainingSummary buildTrainingReport(String username, LocalDateTime date) {
+        MonthSummary monthSummary = new MonthSummary(date.getMonth(), 120);
+        YearSummary yearSummary = new YearSummary(date.getYear(), List.of(monthSummary));
+        String[] split = username.split("\\.");
 
-    private static Trainer buildTrainer(String username) {
-        return Trainer.builder()
+        return TrainingSummary.builder()
                 .username(username)
-                .firstName("John")
-                .lastName("Doe")
+                .firstName(split[0])
+                .lastName(split[1])
                 .status(true)
+                .years(new ArrayList<>(List.of(yearSummary)))
                 .build();
     }
 }

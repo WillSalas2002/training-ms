@@ -1,8 +1,9 @@
 package com.epam.training.controller;
 
-import com.epam.training.dto.TrainerMonthlySummary;
 import com.epam.training.filter.JwtAuthenticationFilter;
-import com.epam.training.model.Trainer;
+import com.epam.training.model.MonthSummary;
+import com.epam.training.model.TrainingSummary;
+import com.epam.training.model.YearSummary;
 import com.epam.training.service.JwtService;
 import com.epam.training.service.TrainerMonthlyReportService;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,8 +19,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.time.Month;
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import static org.mockito.Mockito.anyString;
@@ -49,30 +51,23 @@ class TrainerReportControllerTest {
     @MockitoBean
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    private Trainer trainer;
-    private TrainerMonthlySummary trainerMonthlySummary;
+    private TrainingSummary trainingSummary;
 
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 
-        trainer = buildTrainer("John.Doe");
-
-        trainerMonthlySummary = TrainerMonthlySummary.builder()
-                .trainer(trainer)
-                .summary(Map.of(2024, Map.of(Month.MARCH, 5.5)))
-                .build();
+        trainingSummary = buildTrainingReport("John.Doe", LocalDateTime.of(2023, 11, 11, 11, 11));
     }
 
     @Test
     void shouldReturnSummary_WhenTrainerExists() throws Exception {
-        when(service.generateMonthlyReport("John.Doe")).thenReturn(trainerMonthlySummary);
+        when(service.generateMonthlyReport("John.Doe")).thenReturn(trainingSummary);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/trainers/John.Doe/summary")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.trainer.username").value("John.Doe"))
-                .andExpect(jsonPath("$.summary['2024']['MARCH']").value(5.5));
+                .andExpect(jsonPath("$.username").value("John.Doe"));
 
         verify(service, times(1)).generateMonthlyReport("John.Doe");
     }
@@ -97,12 +92,17 @@ class TrainerReportControllerTest {
         verify(service, never()).generateMonthlyReport(anyString());
     }
 
-    private static Trainer buildTrainer(String username) {
-        return Trainer.builder()
+    private static TrainingSummary buildTrainingReport(String username, LocalDateTime date) {
+        MonthSummary monthSummary = new MonthSummary(date.getMonth(), 120);
+        YearSummary yearSummary = new YearSummary(date.getYear(), List.of(monthSummary));
+        String[] split = username.split("\\.");
+
+        return TrainingSummary.builder()
                 .username(username)
-                .firstName("John")
-                .lastName("Doe")
+                .firstName(split[0])
+                .lastName(split[1])
                 .status(true)
+                .years(new ArrayList<>(List.of(yearSummary)))
                 .build();
     }
 }
