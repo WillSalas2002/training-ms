@@ -3,24 +3,32 @@ package com.epam.training.repository;
 import com.epam.training.model.MonthSummary;
 import com.epam.training.model.TrainingSummary;
 import com.epam.training.model.YearSummary;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import org.springframework.data.mongodb.core.MongoTemplate;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @DataMongoTest
 class ScheduledTrainingRepositoryTest {
 
     @Autowired
     private TrainingRepository repository;
+
+    @Autowired
+    private MongoTemplate mongoTemplate;
+
+    @BeforeEach
+    void cleanUp() {
+        mongoTemplate.getDb().drop();
+    }
 
     @Test
     void testSaveAndFindByTrainerUsername() {
@@ -36,7 +44,7 @@ class ScheduledTrainingRepositoryTest {
 
     @Test
     void testFindByTrainerUsername_NoTrainings() {
-        Optional<TrainingSummary> trainingSummaryOptional = repository.findByUsername("unknownTrainer");
+        Optional<TrainingSummary> trainingSummaryOptional = repository.findByUsername("John.Doe");
         assertFalse(trainingSummaryOptional.isPresent());
     }
 
