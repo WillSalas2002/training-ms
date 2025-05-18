@@ -17,8 +17,12 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class TrainingRepositoryStepDefinitions {
 
@@ -47,6 +51,7 @@ public class TrainingRepositoryStepDefinitions {
     @When("a training summary is created for the trainer on {string}")
     public void aTrainingSummaryIsCreatedForTheTrainerOn(String dateTimeStr) {
         LocalDateTime dateTime = LocalDateTime.parse(dateTimeStr, ISO_LOCAL_DATE_TIME);
+        // TODO: here username is getting fetched from file;
         this.currentTrainingSummary = buildTrainingSummary(currentUsername, dateTime);
     }
 
