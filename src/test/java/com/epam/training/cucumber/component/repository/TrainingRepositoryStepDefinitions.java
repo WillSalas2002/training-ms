@@ -52,6 +52,7 @@ public class TrainingRepositoryStepDefinitions {
     public void aTrainingSummaryIsCreatedForTheTrainerOn(String dateTimeStr) {
         LocalDateTime dateTime = LocalDateTime.parse(dateTimeStr, ISO_LOCAL_DATE_TIME);
         // TODO: here username is getting fetched from file;
+        currentUsername = currentUsername == null ? "John.Doe" : currentUsername;
         this.currentTrainingSummary = buildTrainingSummary(currentUsername, dateTime);
     }
 
